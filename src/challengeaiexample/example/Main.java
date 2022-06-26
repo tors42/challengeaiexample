@@ -53,9 +53,9 @@ public class Main {
         httpServer.createContext("/", exchange -> {
             switch (exchange.getRequestURI().getPath()) {
 
-                case String path && path.equals("/") -> respond(exchange, 200, challengeForm);
+                case "/" -> respond(exchange, 200, challengeForm);
 
-                case String path && path.equals("/loginAndChallenge") -> {
+                case "/loginAndChallenge" -> {
                     var session = new Data(UUID.randomUUID(), new CompletableFuture<UriAndTokenExchange>());
                     sessionCache.put(session.id(), session);
                     exchange.getResponseHeaders().put("Set-Cookie", List.of("id=" + session.id().toString()));
@@ -66,7 +66,7 @@ public class Main {
                     redirect(exchange, session.future().join().url().toString());
                 }
 
-                case String path && path.equals("/redirect") -> {
+                case "/redirect" -> {
                     if (! (readSession(exchange) instanceof Data session)) {
                         respond(exchange, 400, "Missing cookie");
                         return;
@@ -89,7 +89,7 @@ public class Main {
                     auth.account().revokeToken();
                 }
 
-                case String path && path.equals("/game") -> {
+                case "/game" -> {
                     var params = parseQueryParams(exchange.getRequestURI().getQuery());
                     String gameId = params.getOrDefault("gameId", "");
                     String body = String.format(gameLinkTemplate, lichessUri.resolve("/" + gameId));
