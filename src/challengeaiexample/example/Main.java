@@ -3,6 +3,7 @@ package example;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -105,8 +106,12 @@ public class Main {
 
     static Session readSession(HttpExchange exchange) {
         try {
-            return exchange.getRequestHeaders().getOrDefault("cookie", List.of()).stream()
-                .flatMap(cookie -> Arrays.stream(cookie.split("; ")))
+            return exchange.getRequestHeaders().entrySet().stream()
+                .filter(e -> e.getKey().toLowerCase().equals("cookie"))
+                .map(Entry::getValue)
+                .flatMap(List::stream)
+                .flatMap(v -> Arrays.stream(v.split(";")))
+                .map(String::trim)
                 .filter(v -> v.startsWith("id="))
                 .map(v -> v.substring(3))
                 .filter(v -> !v.equals("deleted"))
