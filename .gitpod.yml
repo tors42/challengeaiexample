@@ -1,0 +1,18 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: challengeaiexample
+    command: |
+      mkdir -p lib
+      curl --silent --location --output lib/chariot.jar https://repo1.maven.org/maven2/io/github/tors42/chariot/0.0.42/chariot-0.0.42.jar
+      javac --module-path lib/ --module-source-path src/ --module challengeaiexample -d out/classes/
+      java  --module-path lib/:out/classes/ --module challengeaiexample/example.Main $(gp url 8000)
+  - openMode: split-right
+
+ports:
+  - port: 8000
+    name: challengeaiexample
+    onOpen: open-preview
+    visibility: public
+
