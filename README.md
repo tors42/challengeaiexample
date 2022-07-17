@@ -28,3 +28,6 @@ The app is deployed on Heroku
 
 Open a web browser and navigate to https://challengeaiexample.herokuapp.com
 
+# Test gitpod.io
+
+You can deploy the app in gitpod https://gitpod.io/#https://github.com/tors42/challengeaiexample/tree/gitpod
