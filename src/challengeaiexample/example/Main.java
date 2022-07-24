@@ -77,9 +77,9 @@ public class Main {
                     String state = params.getOrDefault("state", "");
 
                     final Supplier<char[]> token = session.future().join().token(code, state).get();
-                    var auth = Client.auth(c -> c.api(lichessUri.toString()).auth(token));
+                    var client = Client.auth(c -> c.api(lichessUri.toString()).auth(token));
 
-                    auth.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
+                    client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
                         .ifPresentOrElse(challenge -> {
                             sessionCache.remove(session.id());
                             exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
@@ -87,7 +87,7 @@ public class Main {
                         },
                         () -> respond(exchange, 503, "Failed to challenge AI"));
 
-                    auth.account().revokeToken();
+                    client.account().revokeToken();
                 }
 
                 case "/game" -> {
@@ -113,7 +113,7 @@ public class Main {
                 .flatMap(v -> Arrays.stream(v.split(";")))
                 .map(String::trim)
                 .filter(v -> v.startsWith("id="))
-                .map(v -> v.substring(3))
+                .map(v -> v.substring("id=".length()))
                 .filter(v -> !v.equals("deleted"))
                 .filter(v -> !v.isBlank())
                 .map(UUID::fromString)
