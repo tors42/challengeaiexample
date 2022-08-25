@@ -47,7 +47,7 @@ COPY --from=build out/runtime /runtime
 
 RUN /runtime/bin/java --list-modules
 
-ARG appurl=https://challengeaiexample.herokuapp.com
+ARG appurl=http://localhost:8000
 
 ENV APPURL $appurl
 

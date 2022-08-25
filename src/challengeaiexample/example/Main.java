@@ -185,7 +185,7 @@ public class Main {
 
         URI publicURI() {
             return find(PublicURI.class).map(PublicURI::uri)
-                .orElseGet(() -> URI.create("https://challengeaiexample.herokuapp.com"));
+                .orElseGet(() -> URI.create("http://localhost:8000/"));
         }
 
         int bindPort() {
