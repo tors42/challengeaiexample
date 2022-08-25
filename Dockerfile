@@ -5,7 +5,7 @@ RUN apk add openjdk17
 
 COPY src /src
 
-ARG chariotversion=0.0.46
+ARG chariotversion=0.0.49
 
 RUN mkdir /modules
 RUN curl \
