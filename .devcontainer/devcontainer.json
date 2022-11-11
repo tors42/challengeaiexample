@@ -1,0 +1,23 @@
+{
+  "name": "Java",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "VARIANT": "17"
+    }
+  },
+
+  "settings": {
+    "java.jdt.ls.java.home": "/docker-java-home"
+  },
+
+  "extensions": [
+    "vscjava.vscode-java-pack"
+  ],
+
+  "forwardPorts": [8000],
+
+  "postAttachCommand": "java --module-path /lib --add-modules chariot src/challengeaiexample/example/Main.java https://$CODESPACE_NAME-8000.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN",
+
+  "remoteUser": "vscode"
+}

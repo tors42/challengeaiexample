@@ -137,6 +137,7 @@ public class Main {
     static void respond(HttpExchange exchange, int code, String body) {
         var bytes = body.getBytes();
         try {
+            exchange.getResponseHeaders().put("content-type", List.of("text/html"));
             exchange.sendResponseHeaders(code, bytes.length);
             exchange.getResponseBody().write(bytes);
         } catch (IOException ioe) {
