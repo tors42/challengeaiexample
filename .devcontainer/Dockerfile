@@ -2,5 +2,6 @@
 ARG VARIANT="17"
 FROM mcr.microsoft.com/vscode/devcontainers/java:0-${VARIANT}
 
+ARG CHARIOT="0.0.56"
 RUN mkdir -p lib
-RUN curl --location --output lib/chariot.jar https://repo1.maven.org/maven2/io/github/tors42/chariot/0.0.55/chariot-0.0.55.jar
+RUN curl --location --output lib/chariot.jar https://repo1.maven.org/maven2/io/github/tors42/chariot/${CHARIOT}/chariot-${CHARIOT}.jar
