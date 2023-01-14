@@ -1,23 +1,38 @@
 {
   "name": "Java",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "args": {
-      "VARIANT": "17"
-    }
+  "image": "mcr.microsoft.com/devcontainers/java:0-17",
+  "remoteUser": "vscode",
+
+  "features": {
+      "ghcr.io/devcontainers/features/java:1": {
+          "installMaven": "true"
+      }
   },
 
-  "settings": {
-    "java.jdt.ls.java.home": "/docker-java-home"
+  "customizations": {
+      "codespaces": {
+          "openFiles": [
+              "src/main/java/example/Main.java"
+          ]
+      },
+      "vscode": {
+          "settings": {
+            "java.import.maven.enabled": true,
+            "java.maven.downloadSources": true,
+            "java.server.launchMode": "Standard"
+          },
+          "extensions": [
+              "vscjava.vscode-java-pack",
+              "vscjava.vscode-java-debug",
+              "redhat.java"
+          ]
+      }
   },
-
-  "extensions": [
-    "vscjava.vscode-java-pack"
-  ],
 
   "forwardPorts": [8000],
 
-  "postAttachCommand": "java --module-path /lib --add-modules chariot src/challengeaiexample/example/Main.java https://$CODESPACE_NAME-8000.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN",
+  "onCreateCommand": "mvn clean verify",
 
-  "remoteUser": "vscode"
+  "postAttachCommand": "java --module-path ${HOME}/.m2/repository/io/github/tors42/chariot/0.0.57/chariot-0.0.57.jar --add-modules chariot src/main/java/example/Main.java"
+
 }
