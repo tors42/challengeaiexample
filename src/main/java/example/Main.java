@@ -5,12 +5,11 @@ import java.net.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.sun.net.httpserver.*;
 import chariot.*;
-import chariot.api.Account.UriAndTokenExchange;
+import chariot.Client.*;
 
 public class Main {
 
@@ -50,21 +49,25 @@ public class Main {
         System.out.println("Lichess URL: " + lichessUri);
 
         var httpServer = HttpServer.create(bindSocketAddress, 0);
-
+        httpServer.setExecutor(Executors.newCachedThreadPool());
         httpServer.createContext("/", exchange -> {
             switch (exchange.getRequestURI().getPath()) {
 
                 case "/" -> respond(exchange, 200, challengeForm);
 
                 case "/loginAndChallenge" -> {
-                    var session = new Data(UUID.randomUUID(), new CompletableFuture<UriAndTokenExchange>());
+                    var session = new Data(UUID.randomUUID(), new CompletableFuture<>(), new CompletableFuture<>());
                     sessionCache.put(session.id(), session);
                     exchange.getResponseHeaders().put("Set-Cookie", List.of("id=" + session.id().toString()));
-                    session.future().complete(Client.basic(c -> c.api(lichessUri.toString()))
-                            .account().oauthPKCEwithCustomRedirect(
-                                publicUri.resolve("/redirect"),
-                                Client.Scope.challenge_write));
-                    redirect(exchange, session.future().join().url().toString());
+                    var authResult = Client.auth(c -> c.api(lichessUri.toString()),
+                            uri -> redirect(exchange, uri.toString()),
+                            pkce -> pkce
+                                .scope(Scope.challenge_write)
+                                .customRedirect(
+                                    publicUri.resolve("/redirect"),
+                                    () -> session.codeAndStateFuture().join())
+                            );
+                    session.authResultFuture().complete(authResult);
                 }
 
                 case "/redirect" -> {
@@ -76,18 +79,21 @@ public class Main {
                     String code = params.getOrDefault("code", "");
                     String state = params.getOrDefault("state", "");
 
-                    final Supplier<char[]> token = session.future().join().token(code, state).get();
-                    var client = Client.auth(c -> c.api(lichessUri.toString()).auth(token));
-
-                    client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
-                        .ifPresentOrElse(challenge -> {
-                            sessionCache.remove(session.id());
-                            exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
-                            redirect(exchange, String.format("/game?gameId=%s", challenge.id()));
-                        },
-                        () -> respond(exchange, 503, "Failed to challenge AI"));
-
-                    client.account().revokeToken();
+                    session.codeAndStateFuture().complete(new CodeAndState(code, state));
+                    var authResult = session.authResultFuture().join();
+                    if (authResult instanceof AuthOk ok) {
+                        ClientAuth client = ok.client();
+                        client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
+                            .ifPresentOrElse(challenge -> {
+                                sessionCache.remove(session.id());
+                                exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
+                                redirect(exchange, String.format("/game?gameId=%s", challenge.id()));
+                            },
+                            () -> respond(exchange, 503, "Failed to challenge AI"));
+                        client.revokeToken();
+                    } else {
+                        respond(exchange, 503, String.valueOf(authResult));
+                    }
                 }
 
                 case "/game" -> {
@@ -155,7 +161,9 @@ public class Main {
 
     sealed interface Session { static Session none = new None(); }
     record None() implements Session {}
-    record Data(UUID id, CompletableFuture<UriAndTokenExchange> future) implements Session {}
+    record Data(UUID id,
+            CompletableFuture<CodeAndState> codeAndStateFuture,
+            CompletableFuture<AuthResult> authResultFuture) implements Session {}
 
     record Settings(List<Option> options) {
 
