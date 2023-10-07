@@ -1,11 +1,13 @@
 {
   "name": "Java",
-  "image": "mcr.microsoft.com/devcontainers/java:0-17",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
   "remoteUser": "vscode",
 
   "features": {
       "ghcr.io/devcontainers/features/java:1": {
-          "installMaven": "true"
+          "installMaven": "true",
+          "jdkDistro": "open",
+          "version": "21"
       }
   },
 
@@ -33,6 +35,6 @@
 
   "onCreateCommand": "mvn clean verify",
 
-  "postAttachCommand": "java --module-path ${HOME}/.m2/repository/io/github/tors42/chariot/0.0.57/chariot-0.0.57.jar --add-modules chariot src/main/java/example/Main.java"
+  "postAttachCommand": "target/maven-jlink/default/bin/main"
 
 }
