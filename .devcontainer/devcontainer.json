@@ -35,6 +35,6 @@
 
   "onCreateCommand": "mvn clean verify",
 
-  "postAttachCommand": "target/maven-jlink/default/bin/main"
+  "postAttachCommand": "target/maven-jlink/default/bin/main https://${CODESPACE_NAME}-8000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 
 }
