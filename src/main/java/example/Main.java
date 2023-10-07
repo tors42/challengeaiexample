@@ -58,8 +58,8 @@ public class Main {
                 case "/loginAndChallenge" -> {
                     var session = new Data(UUID.randomUUID(), new CompletableFuture<>(), new CompletableFuture<>());
                     sessionCache.put(session.id(), session);
-                    exchange.getResponseHeaders().put("Set-Cookie", List.of("id=" + session.id().toString()));
-                    var authResult = Client.auth(c -> c.api(lichessUri.toString()),
+                    exchange.getResponseHeaders().put("Set-Cookie", List.of("id=" + session.id()));
+                    var authResult = Client.auth(c -> c.api(lichessUri),
                             uri -> redirect(exchange, uri.toString()),
                             pkce -> pkce
                                 .scope(Scope.challenge_write)
@@ -175,10 +175,10 @@ public class Main {
 
         static Settings load(String[] args) throws Exception {
             var options = parseArgs(args);
-            if (System.getenv("PORT") != null) options.add(new BindPort(Integer.parseInt(System.getenv("PORT"))));
-            if (System.getenv("LICHESS_URI") != null) options.add(new LichessURI(URI.create(System.getenv("LICHESS_URI"))));
-            if (System.getenv("BIND_ADDRESS") != null) options.add(new BindAddress(InetAddress.getByName(System.getenv("BIND_ADDRESS"))));
-            return new Settings(options);
+            if (System.getenv("PORT") instanceof String port) options.add(new BindPort(Integer.parseInt(port)));
+            if (System.getenv("LICHESS_URI") instanceof String uri) options.add(new LichessURI(URI.create(uri)));
+            if (System.getenv("BIND_ADDRESS") instanceof String bind) options.add(new BindAddress(InetAddress.getByName(bind)));
+            return new Settings(List.copyOf(options));
         }
 
         static List<Option> parseArgs(String[] args) {
