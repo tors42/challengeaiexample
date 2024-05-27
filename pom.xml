@@ -12,13 +12,12 @@
         <dependency>
             <groupId>io.github.tors42</groupId>
             <artifactId>chariot</artifactId>
-            <version>0.0.86</version>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
@@ -26,7 +25,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version>
             </plugin>
 
             <plugin>
