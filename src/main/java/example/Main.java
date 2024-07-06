@@ -71,7 +71,7 @@ public class Main {
                 }
 
                 case "/redirect" -> {
-                    if (! (readSession(exchange) instanceof Data session)) {
+                    if (! (readSession(exchange) instanceof Data(var id, var csFuture, var authFuture))) {
                         respond(exchange, 400, "Missing cookie");
                         return;
                     }
@@ -79,13 +79,12 @@ public class Main {
                     String code = params.getOrDefault("code", "");
                     String state = params.getOrDefault("state", "");
 
-                    session.codeAndStateFuture().complete(new CodeAndState(code, state));
-                    var authResult = session.authResultFuture().join();
-                    if (authResult instanceof AuthOk ok) {
-                        ClientAuth client = ok.client();
+                    csFuture.complete(new CodeAndState(code, state));
+                    var authResult = authFuture.join();
+                    if (authResult instanceof AuthOk(var client)) {
                         client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
                             .ifPresentOrElse(challenge -> {
-                                sessionCache.remove(session.id());
+                                sessionCache.remove(id);
                                 exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
                                 redirect(exchange, String.format("/game?gameId=%s", challenge.id()));
                             },
