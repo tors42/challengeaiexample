@@ -12,7 +12,7 @@
         <dependency>
             <groupId>io.github.tors42</groupId>
             <artifactId>chariot</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.4</version>
         </dependency>
     </dependencies>
 
@@ -31,11 +31,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jlink-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <launcher>main=challengeaiexample/example.Main</launcher>
-                    <compress>2</compress>
+                    <compress>zip-9</compress>
                     <noHeaderFiles>true</noHeaderFiles>
                     <noManPages>true</noManPages>
                 </configuration>
