@@ -82,7 +82,7 @@ public class Main {
                     csFuture.complete(new CodeAndState(code, state));
                     var authResult = authFuture.join();
                     if (authResult instanceof AuthOk(var client)) {
-                        client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(l -> l.one()))
+                        client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(1))
                             .ifPresentOrElse(challenge -> {
                                 sessionCache.remove(id);
                                 exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
