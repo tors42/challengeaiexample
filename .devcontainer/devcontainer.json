@@ -1,13 +1,13 @@
 {
   "name": "Java",
-  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "image": "mcr.microsoft.com/devcontainers/java:23",
   "remoteUser": "vscode",
 
   "features": {
       "ghcr.io/devcontainers/features/java:1": {
           "installMaven": "true",
           "jdkDistro": "open",
-          "version": "21"
+          "version": "23"
       }
   },
 
