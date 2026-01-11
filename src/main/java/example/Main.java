@@ -1,15 +1,8 @@
 package example;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
-import com.sun.net.httpserver.*;
-import chariot.*;
-import chariot.Client.*;
+import module java.base;
+import module chariot;
+import module jdk.httpserver;
 
 public class Main {
 
@@ -62,9 +55,8 @@ public class Main {
                     var authResult = Client.auth(c -> c.api(lichessUri),
                             uri -> redirect(exchange, uri.toString()),
                             pkce -> pkce
-                                .scope(Scope.challenge_write)
-                                .customRedirect(
-                                    publicUri.resolve("/redirect"),
+                                .scope(Client.Scope.challenge_write)
+                                .customRedirect(publicUri.resolve("/redirect"),
                                     () -> session.codeAndStateFuture().join())
                             );
                     session.authResultFuture().complete(authResult);
@@ -78,12 +70,11 @@ public class Main {
                     var params = parseQueryParams(exchange.getRequestURI().getQuery());
                     String code = params.getOrDefault("code", "");
                     String state = params.getOrDefault("state", "");
-
-                    csFuture.complete(new CodeAndState(code, state));
+                    csFuture.complete(new Client.CodeAndState(code, state));
                     var authResult = authFuture.join();
-                    if (authResult instanceof AuthOk(var client)) {
+                    if (authResult instanceof Some(var client)) {
                         client.challenges().challengeAI(conf -> conf.clockBlitz5m3s().level(1))
-                            .ifPresentOrElse(challenge -> {
+                            .maybe().ifPresentOrElse(challenge -> {
                                 sessionCache.remove(id);
                                 exchange.getResponseHeaders().put("Set-Cookie", List.of("id=deleted"));
                                 redirect(exchange, String.format("/game?gameId=%s", challenge.id()));
@@ -112,7 +103,7 @@ public class Main {
         try {
             return exchange.getRequestHeaders().entrySet().stream()
                 .filter(e -> e.getKey().toLowerCase().equals("cookie"))
-                .map(Entry::getValue)
+                .map(Map.Entry::getValue)
                 .flatMap(List::stream)
                 .flatMap(v -> Arrays.stream(v.split(";")))
                 .map(String::trim)
@@ -161,8 +152,8 @@ public class Main {
     sealed interface Session { static Session none = new None(); }
     record None() implements Session {}
     record Data(UUID id,
-            CompletableFuture<CodeAndState> codeAndStateFuture,
-            CompletableFuture<AuthResult> authResultFuture) implements Session {}
+            CompletableFuture<Client.CodeAndState> codeAndStateFuture,
+            CompletableFuture<One<ClientAuth>> authResultFuture) implements Session {}
 
     record Settings(List<Option> options) {
 
